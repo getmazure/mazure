@@ -1,0 +1,8 @@
+-r requirements.txt
+
+black==23.12.1
+mypy
+ruff
+pylint
+pytest
+requests
