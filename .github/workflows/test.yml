@@ -1,0 +1,75 @@
+name: Lint'n'Test
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Lint
+        run: |
+          make init
+          make lint
+
+  test_python:
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Start Mazure
+        run: |
+          ls -la
+          ls -la mazure/
+          docker build --tag mazure .
+          docker run -p 5005:5005 mazure &
+      - name: Install Dev dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Execute tests
+        env:
+          REQUESTS_CA_BUNDLE: "mazure/mazure_proxy/ca.crt"
+          HTTPS_PROXY: "http://localhost:5005"
+        run: |
+          pytest -sv tests/tests_python/
+
+  test_java:
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+    - name: Start Mazure
+      run: |
+        make init
+        ls -la
+        mazure &
+    - uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        cache: 'maven'
+    - name: Build with Maven
+      env:
+        REQUESTS_CA_BUNDLE: "mazure/mazure_proxy/ca.crt"
+        HTTPS_PROXY: "http://localhost:5005"
+      run: |
+        cd tests/tests_java && mvn test

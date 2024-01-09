@@ -1,0 +1,82 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mazure"
+version = "0.0.1"
+dependencies = [
+]
+requires-python = ">=3.8"
+authors = [
+  {name = "Bert Blommers", email = "info@bertblommers.nl"}
+]
+maintainers = [
+  {name = "Bert Blommers", email = "info@bertblommers.nl"}
+]
+description = "Mazure - an easy tool to mock Azure SDK's"
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = ["azure", "sdk", "mock"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12"
+]
+
+
+[project.urls]
+Homepage = "https://example.com"
+Documentation = "https://readthedocs.org"
+Repository = "https://github.com/getmoto/mazure.git"
+"Bug Tracker" = "https://github.com/getmoto/mazure/issues"
+Changelog = "https://github.com/getmoto/mazure/blob/master/CHANGELOG.md"
+
+[project.scripts]
+mazure = "mazure.proxy:main"
+
+[tool.ruff]
+line-length = 88
+indent-width = 4
+
+[tool.pylint.'MESSAGES CONTROL']
+disable = "C0114, C0115, C0116, R0903, R0914"
+
+[tool.ruff.lint]
+select = ["I"]
+
+[tool.mypy]
+files = "mazure, tests"
+show_column_numbers=true
+show_error_codes = true
+disable_error_code = "abstract"
+
+disallow_any_unimported = false
+disallow_any_expr = false
+disallow_any_decorated = true
+disallow_any_explicit = false
+disallow_any_generics = true
+disallow_subclassing_any = true
+
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+
+no_implicit_optional = true
+strict_optional = true
+
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_return_any = true
+warn_unreachable = true
+
+strict_equality = true
+ignore_missing_imports = true
+follow_imports = "silent"
