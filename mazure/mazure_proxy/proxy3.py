@@ -39,15 +39,15 @@ class MazureRequest:
         host: str,
         path: str,
         headers: Any,
-        body: bytes,  # pylint: disable=unused-argument
+        body: bytes,
         form_data: Dict[str, Any],  # pylint: disable=unused-argument
     ) -> Any:
-        status_code, res_headers, res_body = get(host, path, method)
+        status_code, res_headers, res_body = get(host, path, method, body=body)
 
         full_res_headers = self.default_headers.copy()
         full_res_headers.update(res_headers)
 
-        if "gzip" in [
+        if "content-length" not in full_res_headers and "gzip" in [
             enc.strip() for enc in headers.get("Accept-Encoding", "").split(",")
         ]:
             res_body = compress(res_body)
