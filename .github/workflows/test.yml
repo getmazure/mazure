@@ -63,13 +63,14 @@ jobs:
         ls -la
         mazure &
     - uses: actions/setup-java@v4
+      id: java
       with:
         distribution: 'temurin'
         java-version: '17'
         cache: 'maven'
+    - name: Import Proxy Certificate
+      shell: bash
+      run: sudo keytool -import -noprompt -alias mazure -file mazure/mazure_proxy/ca.crt -keystore ${{ steps.java.outputs.path }}/lib/security/cacerts -storepass "changeit"
     - name: Build with Maven
-      env:
-        REQUESTS_CA_BUNDLE: "mazure/mazure_proxy/ca.crt"
-        HTTPS_PROXY: "http://localhost:5005"
       run: |
         cd tests/tests_java && mvn test
