@@ -124,6 +124,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         else:
             host = "http://" + req.headers["Host"]
         path = req.path
+        debug(f"{self.command} {host} {path}")
 
         response = MazureRequest().parse_request(
             method=req.command,
