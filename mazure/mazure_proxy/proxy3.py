@@ -1,62 +1,19 @@
 # -*- coding: utf-8 -*-
 import ssl
-from gzip import compress
 from http.server import BaseHTTPRequestHandler
 from subprocess import CalledProcessError, check_output
 from typing import Any, Dict
-from uuid import uuid4
+from urllib.parse import urlparse
 
-from mazure.mazure_core.service_discovery import get
+from mazure import azure_services  # pylint: disable=unused-import
+from mazure.mazure_core import MazureRequest
+from mazure.mazure_core.service_discovery import execute
 
 from . import debug, info
 from .certificate_creator import CertificateCreator
 from .utils import get_body_from_form_data
 
 # Adapted from https://github.com/xxlv/proxy3
-
-
-class MazureRequest:
-    def __init__(self) -> None:
-        self.request_id = str(uuid4())
-        self.default_headers = {
-            "Cache-Control": "no-cache",
-            "Pragma": "no-cache",
-            "Content-Type": "application/json; charset=utf-8",
-            "Expires": "-1",
-            "Vary": "Accept-Encoding",
-            "x-ms-ratelimit-remaining-subscription-reads": 11999,
-            "x-ms-request-id": self.request_id,
-            "x-ms-correlation-request-id": self.request_id,
-            "x-ms-routing-request-id": f"FRANCESOUTH:20240108T215501Z:{self.request_id}",
-            "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-            "X-Content-Type-Options": "nosniff",
-            "Date": "Mon, 08 Jan 2024 21:55:01 GMT",
-        }
-
-    def parse_request(  # pylint: disable=too-many-arguments
-        self,
-        method: str,
-        host: str,
-        path: str,
-        headers: Any,
-        body: bytes,
-        form_data: Dict[str, Any],  # pylint: disable=unused-argument
-    ) -> Any:
-        status_code, res_headers, res_body = get(host, path, method, body=body)
-
-        full_res_headers = self.default_headers.copy()
-        full_res_headers.update(res_headers)
-
-        if "content-length" not in full_res_headers and "gzip" in [
-            enc.strip() for enc in headers.get("Accept-Encoding", "").split(",")
-        ]:
-            res_body = compress(res_body)
-            full_res_headers["Content-Encoding"] = "gzip"
-
-        if "content-length" not in full_res_headers and res_body:
-            full_res_headers["Content-Length"] = str(len(res_body))
-
-        return status_code, full_res_headers, res_body
 
 
 class ProxyRequestHandler(BaseHTTPRequestHandler):
@@ -124,21 +81,19 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         else:
             host = "http://" + req.headers["Host"]
         path = req.path
-        debug(f"{self.command} {host} {path}")
+        debug(f"{self.command} {host}{path}")
 
-        response = MazureRequest().parse_request(
-            method=req.command,
+        parsed = urlparse(path)
+        request = MazureRequest(
             host=host,
-            path=path,
+            path=parsed.path,
+            method=req.command,
             headers=req.headers,
             body=req_body,
-            form_data=form_data,
         )
-        res_status, res_headers, res_body = response
+        res_status, res_headers, res_body = execute(request)
 
         res_reason = "OK"
-        if isinstance(res_body, str):
-            res_body = res_body.encode("utf-8")
 
         self.wfile.write(
             f"{self.protocol_version} {res_status} {res_reason}\r\n".encode("utf-8")
