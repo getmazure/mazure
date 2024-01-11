@@ -44,7 +44,7 @@ line-length = 88
 indent-width = 4
 
 [tool.pylint.'MESSAGES CONTROL']
-disable = "C0114, C0115, C0116, R0903, R0914"
+disable = "C0301, C0114, C0115, C0116, R0903, R0911, R0914"
 
 [tool.ruff.lint]
 select = ["I"]
