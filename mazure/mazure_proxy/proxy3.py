@@ -11,7 +11,7 @@ from mazure.mazure_core.service_discovery import execute
 
 from . import debug, info
 from .certificate_creator import CertificateCreator
-from .utils import get_body_from_form_data
+from .utils import get_body_from_form_data, read_chunked_body
 
 # Adapted from https://github.com/xxlv/proxy3
 
@@ -116,25 +116,8 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             req_body = self.rfile.read(content_length)
         elif "chunked" in self.headers.get("Transfer-Encoding", ""):
             # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Transfer-Encoding
-            req_body = self.read_chunked_body(self.rfile)
+            req_body = read_chunked_body(self.rfile)
         return req_body
-
-    def read_chunked_body(self, reader: Any) -> bytes:
-        chunked_body = b""
-        while True:
-            line = reader.readline().strip()
-            chunk_length = int(line, 16)
-            if chunk_length != 0:
-                chunked_body += reader.read(chunk_length)
-
-            # Each chunk is followed by an additional empty newline
-            reader.readline()
-
-            # a chunk size of 0 is an end indication
-            if chunk_length == 0:
-                # AWS does send additional (checksum-)headers, but we can ignore them
-                break
-        return chunked_body
 
     def decode_request_body(self, headers: Dict[str, str], body: Any) -> Any:
         if body is None:
