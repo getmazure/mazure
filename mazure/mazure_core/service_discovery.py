@@ -23,6 +23,7 @@ def execute(request: MazureRequest) -> ResponseType:
             for path, func in operations_for_host.items():
                 if re.match(path, request.path):
                     status_code, res_headers, res_body = func(request)
+
         else:
             status_code, res_headers, res_body = 404, {}, ERROR_NOT_YET_IMPLEMENTED
     else:
@@ -31,13 +32,22 @@ def execute(request: MazureRequest) -> ResponseType:
     full_res_headers = request.default_headers.copy()
     full_res_headers.update(res_headers)
 
-    if "content-length" not in full_res_headers and "gzip" in [
-        enc.strip() for enc in request.headers.get("Accept-Encoding", "").split(",")
-    ]:
+    if (
+        "content-length" not in full_res_headers
+        and full_res_headers.get("Transfer-Encoding") != "chunked"
+        and "gzip"
+        in [
+            enc.strip() for enc in request.headers.get("Accept-Encoding", "").split(",")
+        ]
+    ):
         res_body = compress(res_body)
         full_res_headers["Content-Encoding"] = "gzip"
 
-    if "content-length" not in full_res_headers and res_body:
+    if (
+        "content-length" not in full_res_headers
+        and full_res_headers.get("Transfer-Encoding") != "chunked"
+        and res_body
+    ):
         full_res_headers["Content-Length"] = str(len(res_body))
 
     return status_code, full_res_headers, res_body
