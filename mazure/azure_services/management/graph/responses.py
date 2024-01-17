@@ -8,30 +8,33 @@ from mazure.mazure_core import MazureRequest, ResponseType
 from mazure.mazure_core.route_mapping import register
 from mazure.mazure_proxy.utils import chunk_body
 
+from .models import graph_backend
+
 
 @register(
     "https://graph.microsoft.com",
-    path=re.compile("^/v1.0/applications$"),
+    path=re.compile(r"^/v1.0/applications$"),
     method="GET",
 )
 def list_applications(
     request: MazureRequest,  # pylint: disable=unused-argument
 ) -> ResponseType:
-    login_response = {
+    apps = graph_backend.list_applications()
+    app_list = {
         "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#applications",
-        "value": [],
+        "value": [app.to_json() for app in apps],
     }
     chunk_headers = {
         "Transfer-Encoding": "chunked",
         "Content-Type": "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8",
     }
-    chunked = chunk_body(json.dumps(login_response).encode("utf-8"))
+    chunked = chunk_body(json.dumps(app_list).encode("utf-8"))
     return 200, chunk_headers, chunked
 
 
 @register(
     "https://graph.microsoft.com",
-    path=re.compile("^/v1.0/applications$"),
+    path=re.compile(r"^/v1.0/applications$"),
     method="POST",
 )
 def create_application(
@@ -39,84 +42,157 @@ def create_application(
 ) -> ResponseType:
     name = json.loads(request.body.decode("utf-8"))["displayName"]
 
-    app_response = {
-        "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#applications/$entity",
-        "id": "b9e8cb68-315b-4882-997f-a2fd37679494",
-        "deletedDateTime": None,
-        "appId": "909611bc-3018-4e41-92a8-5d7dc6ac46af",
-        "applicationTemplateId": None,
-        "disabledByMicrosoftStatus": None,
-        "createdDateTime": "2024-01-10T23:44:21.8011524Z",
-        "displayName": name,
-        "description": None,
-        "groupMembershipClaims": None,
-        "identifierUris": [],
-        "isDeviceOnlyAuthSupported": None,
-        "isFallbackPublicClient": None,
-        "notes": None,
-        "publisherDomain": "azurecustomername.onmicrosoft.com",
-        "serviceManagementReference": None,
-        "signInAudience": "AzureADandPersonalMicrosoftAccount",
-        "tags": [],
-        "tokenEncryptionKeyId": None,
-        "samlMetadataUrl": None,
-        "defaultRedirectUri": None,
-        "certification": None,
-        "optionalClaims": None,
-        "servicePrincipalLockConfiguration": None,
-        "requestSignatureVerification": None,
-        "addIns": [],
-        "api": {
-            "acceptMappedClaims": None,
-            "knownClientApplications": [],
-            "requestedAccessTokenVersion": 2,
-            "oauth2PermissionScopes": [],
-            "preAuthorizedApplications": [],
-        },
-        "appRoles": [],
-        "info": {
-            "logoUrl": None,
-            "marketingUrl": None,
-            "privacyStatementUrl": None,
-            "supportUrl": None,
-            "termsOfServiceUrl": None,
-        },
-        "keyCredentials": [],
-        "parentalControlSettings": {
-            "countriesBlockedForMinors": [],
-            "legalAgeGroupRule": "Allow",
-        },
-        "passwordCredentials": [],
-        "publicClient": {"redirectUris": []},
-        "requiredResourceAccess": [],
-        "verifiedPublisher": {
-            "displayName": None,
-            "verifiedPublisherId": None,
-            "addedDateTime": None,
-        },
-        "web": {
-            "homePageUrl": None,
-            "logoutUrl": None,
-            "redirectUris": [],
-            "implicitGrantSettings": {
-                "enableAccessTokenIssuance": False,
-                "enableIdTokenIssuance": False,
-            },
-            "redirectUriSettings": [],
-        },
-        "spa": {"redirectUris": []},
-    }
+    app = graph_backend.create_application(name)
     chunk_headers = {
         "Transfer-Encoding": "chunked",
         "Content-Type": "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8",
     }
-    chunked = chunk_body(json.dumps(app_response).encode("utf-8"))
+    chunked = chunk_body(json.dumps(app.to_json()).encode("utf-8"))
     return 200, chunk_headers, chunked
 
 
 @register(
     "https://graph.microsoft.com",
-    path=re.compile("^/v1.0/applications/[-a-z0-9A-Z]+/addPassword$"),
+    path=re.compile(r"^/v1.0/applications/[^/]+$"),
+    method="GET",
+)
+def get_application(request: MazureRequest) -> ResponseType:
+    app_object_id = request.path.split("/")[-1]
+
+    app = next(
+        (
+            app
+            for app in graph_backend.applications
+            if app.app_object_id == app_object_id
+        ),
+        None,
+    )
+    if app is None:
+        return 404, {}, b"Application not found"
+
+    chunk_headers = {
+        "Transfer-Encoding": "chunked",
+        "Content-Type": "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8",
+    }
+    chunked = chunk_body(json.dumps(app.to_json()).encode("utf-8"))
+    return 200, chunk_headers, chunked
+
+
+@register(
+    "https://graph.microsoft.com",
+    path=re.compile(r"^/v1.0/applications\(appId='[-a-z0-9A-Z]+'\)$"),
+    method="GET",
+)
+def get_application_by_app_id(request: MazureRequest) -> ResponseType:
+    app_id = re.search("appId='([-a-z0-9A-Z]+)'", request.path).group(1)  # type: ignore
+
+    app = next(
+        (app for app in graph_backend.applications if app.app_id == app_id), None
+    )
+    if app is None:
+        return 404, {}, b"Application not found"
+
+    chunk_headers = {
+        "Transfer-Encoding": "chunked",
+        "Content-Type": "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8",
+    }
+    chunked = chunk_body(json.dumps(app.to_json()).encode("utf-8"))
+    return 200, chunk_headers, chunked
+
+
+@register(
+    "https://graph.microsoft.com",
+    path=re.compile(r"^/v1.0/applications/[-a-z0-9A-Z]+$"),
+    method="PATCH",
+)
+def update_application(request: MazureRequest) -> ResponseType:
+    app_object_id = request.path.split("/")[-1]
+
+    app = next(
+        (
+            app
+            for app in graph_backend.applications
+            if app.app_object_id == app_object_id
+        ),
+        None,
+    )
+    if app is None:
+        return 404, {}, b"Application not found"
+
+    app.update(json.loads(request.body.decode("utf-8")))
+
+    return 204, {}, b""
+
+
+@register(
+    "https://graph.microsoft.com",
+    path=re.compile(r"^/v1.0/applications\(appId='[-a-z0-9A-Z]+'\)$"),
+    method="PATCH",
+)
+def update_application_by_app_id(request: MazureRequest) -> ResponseType:
+    app_id = re.search("appId='([-a-z0-9A-Z]+)'", request.path).group(1)  # type: ignore
+
+    app = next(
+        (app for app in graph_backend.applications if app.app_id == app_id), None
+    )
+    if app is None:
+        return 404, {}, b"Application not found"
+
+    app.update(json.loads(request.body.decode("utf-8")))
+
+    return 204, {}, b""
+
+
+@register(
+    "https://graph.microsoft.com",
+    path=re.compile(r"^/v1.0/applications/[-a-z0-9A-Z]+$"),
+    method="DELETE",
+)
+def delete_application(request: MazureRequest) -> ResponseType:
+    app_object_id = request.path.split("/")[-1]
+
+    graph_backend.delete_application(app_object_id=app_object_id)
+
+    return 204, {}, b""
+
+
+@register(
+    "https://graph.microsoft.com",
+    path=re.compile(r"^/v1.0/applications\(appId='[-a-z0-9A-Z]+'\)$"),
+    method="DELETE",
+)
+def delete_application_by_app_id(request: MazureRequest) -> ResponseType:
+    app_id = re.search("appId='([-a-z0-9A-Z]+)'", request.path).group(1)  # type: ignore
+
+    graph_backend.delete_application(app_id=app_id)
+
+    return 204, {}, b""
+
+
+@register(
+    "https://graph.microsoft.com",
+    path=re.compile(r"^/directory/deleteditems/microsoft.graph.application$"),
+    method="GET",
+)
+def list_deleted_applications(
+    request: MazureRequest,  # pylint: disable=unused-argument
+) -> ResponseType:
+    chunk_headers = {
+        "Transfer-Encoding": "chunked",
+        "Content-Type": "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8",
+    }
+    app_list = {
+        "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#applications",
+        "value": [app.to_json() for app in graph_backend.list_deleted_applications()],
+    }
+    chunked = chunk_body(json.dumps(app_list).encode("utf-8"))
+
+    return 200, chunk_headers, chunked
+
+
+@register(
+    "https://graph.microsoft.com",
+    path=re.compile(r"^/v1.0/applications/[-a-z0-9A-Z]+/addPassword$"),
     method="POST",
 )
 def add_password(
@@ -150,7 +226,7 @@ def add_password(
 
 @register(
     "https://graph.microsoft.com",
-    path=re.compile("^/v1.0/servicePrincipals$"),
+    path=re.compile(r"^/v1.0/servicePrincipals$"),
     method="POST",
 )
 def create_service_principal(
