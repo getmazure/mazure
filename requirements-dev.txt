@@ -6,3 +6,4 @@ ruff
 pylint
 pytest
 requests
+responses

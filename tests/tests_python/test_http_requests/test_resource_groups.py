@@ -1,9 +1,14 @@
+from typing import Any
 from uuid import uuid4
 
 import requests
 
+from . import skip_if_proxy_not_configured  # pylint: disable=W0611
 
-def test_resource_group_lifecycle() -> None:
+
+def test_resource_group_lifecycle(
+    skip_if_proxy_not_configured: Any,  # pylint: disable=W0613, W0621
+) -> None:
     sub = uuid4()
     rg_name = "my_resource_group"
     url = f"https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg_name}?api-version=2022-09-01"
