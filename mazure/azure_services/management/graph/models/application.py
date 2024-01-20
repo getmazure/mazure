@@ -1,23 +1,30 @@
 from typing import Any, Dict
 from uuid import uuid4
 
+from peewee import Model, TextField, UUIDField
 
-class Application:
-    def __init__(self, name: str):
-        self.app_id = str(uuid4())
-        self.app_object_id = str(uuid4())
-        self.name = name
+from mazure.mazure_core import db
 
-    def update(self, body: Dict[str, Any]) -> None:
+
+class Application(Model):  # type: ignore[misc]
+    app_object_id = UUIDField(primary_key=True, default=uuid4)
+    app_id = UUIDField(default=uuid4)
+    name = TextField()
+
+    class Meta:
+        database = db
+
+    def update_details(self, body: Dict[str, Any]) -> None:
         if "displayName" in body:
             self.name = body["displayName"]
+        self.save()
 
     def to_json(self) -> Dict[str, Any]:
         return {
             "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#applications/$entity",
-            "id": self.app_object_id,
+            "id": str(self.app_object_id),
             "deletedDateTime": None,
-            "appId": self.app_id,
+            "appId": str(self.app_id),
             "applicationTemplateId": None,
             "disabledByMicrosoftStatus": None,
             "createdDateTime": "2024-01-10T23:44:21.8011524Z",
@@ -80,3 +87,7 @@ class Application:
             },
             "spa": {"redirectUris": []},
         }
+
+
+class DeletedApplication(Application):
+    pass
