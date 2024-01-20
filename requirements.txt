@@ -1,2 +1,3 @@
 PyJWT
 multipart
+peewee

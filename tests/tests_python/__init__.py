@@ -9,16 +9,6 @@ import responses
 from mazure.mazure_core import ResponseType
 
 
-@pytest.fixture(scope="function", autouse=True)
-def reset_data() -> None:
-    from mazure.azure_services.management.graph.models import (  # pylint: disable=import-outside-toplevel
-        graph_backend,
-    )
-
-    graph_backend.applications.clear()
-    graph_backend.deleted_applications.clear()
-
-
 @pytest.fixture(autouse=True)
 def load_responses() -> Generator[None, None, None]:
     from mazure import (  # pylint: disable=import-outside-toplevel,unused-import

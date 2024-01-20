@@ -59,14 +59,7 @@ def create_application(
 def get_application(request: MazureRequest) -> ResponseType:
     app_object_id = request.path.split("/")[-1]
 
-    app = next(
-        (
-            app
-            for app in graph_backend.applications
-            if app.app_object_id == app_object_id
-        ),
-        None,
-    )
+    app = graph_backend.get_application(app_object_id)
     if app is None:
         return 404, {}, b"Application not found"
 
@@ -86,9 +79,7 @@ def get_application(request: MazureRequest) -> ResponseType:
 def get_application_by_app_id(request: MazureRequest) -> ResponseType:
     app_id = re.search("appId='([-a-z0-9A-Z]+)'", request.path).group(1)  # type: ignore
 
-    app = next(
-        (app for app in graph_backend.applications if app.app_id == app_id), None
-    )
+    app = graph_backend.get_application_by_app_id(app_id)
     if app is None:
         return 404, {}, b"Application not found"
 
@@ -108,18 +99,10 @@ def get_application_by_app_id(request: MazureRequest) -> ResponseType:
 def update_application(request: MazureRequest) -> ResponseType:
     app_object_id = request.path.split("/")[-1]
 
-    app = next(
-        (
-            app
-            for app in graph_backend.applications
-            if app.app_object_id == app_object_id
-        ),
-        None,
-    )
+    deeds = json.loads(request.body.decode("utf-8"))
+    app = graph_backend.update_application(app_object_id, deeds)
     if app is None:
         return 404, {}, b"Application not found"
-
-    app.update(json.loads(request.body.decode("utf-8")))
 
     return 204, {}, b""
 
@@ -132,13 +115,10 @@ def update_application(request: MazureRequest) -> ResponseType:
 def update_application_by_app_id(request: MazureRequest) -> ResponseType:
     app_id = re.search("appId='([-a-z0-9A-Z]+)'", request.path).group(1)  # type: ignore
 
-    app = next(
-        (app for app in graph_backend.applications if app.app_id == app_id), None
-    )
+    deeds = json.loads(request.body.decode("utf-8"))
+    app = graph_backend.update_application_by_app_id(app_id, deeds)
     if app is None:
         return 404, {}, b"Application not found"
-
-    app.update(json.loads(request.body.decode("utf-8")))
 
     return 204, {}, b""
 
