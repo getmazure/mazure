@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 import ssl
 from http.server import BaseHTTPRequestHandler
 from subprocess import CalledProcessError, check_output
@@ -81,6 +82,8 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         else:
             host = "http://" + req.headers["Host"]
         path = req.path
+        if re.match("^http://[0-9]{3}.[0-9]{3}.[0-9]{3}.[0-9]{3}.+", path):
+            path = path[path.find("/", len("http://")) :]
         debug(f"{self.command} {host}{path}")
 
         parsed = urlparse(path)
@@ -90,6 +93,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             method=req.command,
             headers=req.headers,
             body=req_body,
+            parsed_path=parsed,
         )
         res_status, res_headers, res_body = execute(request)
 

@@ -1,5 +1,6 @@
 from email.message import Message
 from typing import Any, Dict
+from urllib.parse import ParseResult
 from uuid import uuid4
 
 
@@ -11,6 +12,7 @@ class MazureRequest:
         method: str,
         headers: Message,
         body: bytes,
+        parsed_path: ParseResult,
     ):
         self.request_id = str(uuid4())
         self.default_headers: Dict[str, Any] = {
@@ -33,3 +35,4 @@ class MazureRequest:
         self.host = host
         self.path = path
         self.method = method
+        self.parsed_path = parsed_path

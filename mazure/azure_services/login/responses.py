@@ -4,6 +4,7 @@ import random
 import re
 import string
 from datetime import datetime, timezone
+from urllib.parse import unquote
 
 import jwt
 
@@ -144,4 +145,51 @@ def get_oauth_token(
     }
     if client_info is not None:
         login_response["client_info"] = client_info
+    return 200, {}, json.dumps(login_response).encode("utf-8")
+
+
+@register(
+    "http://169.254.169.254",
+    path=re.compile("^/metadata/identity/oauth2/token$"),
+    method="GET",
+)
+def get_oauth_token__managed_identity(
+    request: MazureRequest,  # pylint: disable=unused-argument
+) -> ResponseType:
+    refresh_token = ""
+
+    resource = [
+        unquote(a.split("=")[-1])
+        for a in request.parsed_path.query.split("&")
+        if a.startswith("resource=")
+    ][0]
+
+    delta = datetime.utcnow() - datetime.utcfromtimestamp(0)
+    not_before = int(
+        (delta.days * 86400) + (delta.seconds + (delta.microseconds / 1e6)) - 5000
+    )
+    expires_on = int(
+        (delta.days * 86400) + (delta.seconds + (delta.microseconds / 1e6)) + 5000
+    )
+    access_token = jwt.encode(
+        payload={
+            "iss": resource,
+            "exp": expires_on,
+            "nbf": not_before,
+            "iat": datetime.utcnow(),
+        },
+        key="secret",
+        algorithm="HS256",
+        headers={"kid": "5B3nRxtQ7ji8eNDc3Fy05Kf97ZE"},
+    )
+    login_response = {
+        "token_type": "Bearer",
+        "expires_in": 4922,
+        "expires_on": expires_on,
+        "not_before": not_before,
+        "resource": resource,
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+    }
+
     return 200, {}, json.dumps(login_response).encode("utf-8")
