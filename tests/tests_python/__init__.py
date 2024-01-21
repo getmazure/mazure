@@ -32,6 +32,7 @@ def load_responses() -> Generator[None, None, None]:
             path=parsed.path,  # type: ignore
             headers=request.headers,  # type: ignore
             body=request.body,  # type: ignore
+            parsed_path=parsed,  # type: ignore
         )
         for method, host_per_method in registered_services.items():
             if method != request.method:
@@ -45,15 +46,13 @@ def load_responses() -> Generator[None, None, None]:
         raise ValueError
 
     for method, per_host in registered_services.items():
-        for host, func_per_path in per_host.items():
-            for path in func_per_path.keys():
-                full_path = host + path.pattern.replace("^", "").replace("$", "")
-                r_mock.add_callback(
-                    method=method,
-                    url=re.compile(full_path),
-                    callback=request_callback,
-                    match_querystring=False,
-                )
+        for host in per_host.keys():
+            r_mock.add_callback(
+                method=method,
+                url=re.compile(host),
+                callback=request_callback,
+                match_querystring=False,
+            )
 
     yield
 
