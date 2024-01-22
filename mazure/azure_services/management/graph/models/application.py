@@ -3,16 +3,11 @@ from uuid import uuid4
 
 from peewee import Model, TextField, UUIDField
 
-from mazure.mazure_core import db
-
 
 class Application(Model):  # type: ignore[misc]
     app_object_id = UUIDField(primary_key=True, default=uuid4)
     app_id = UUIDField(default=uuid4)
     name = TextField()
-
-    class Meta:
-        database = db
 
     def update_details(self, body: Dict[str, Any]) -> None:
         if "displayName" in body:

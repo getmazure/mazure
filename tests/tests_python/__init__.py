@@ -1,18 +1,19 @@
 import re
 from typing import Generator
-from urllib.parse import urlparse
+from urllib.parse import ParseResult, urlparse
 
 import pytest
 import requests
 import responses
-
-from mazure.mazure_core import ResponseType
 
 
 @pytest.fixture(autouse=True)
 def load_responses() -> Generator[None, None, None]:
     from mazure import (  # pylint: disable=import-outside-toplevel,unused-import
         azure_services,
+    )
+    from mazure.mazure_core import (  # pylint: disable=import-outside-toplevel
+        ResponseType,
     )
     from mazure.mazure_core.mazure_request import (  # pylint: disable=import-outside-toplevel
         MazureRequest,
@@ -25,23 +26,24 @@ def load_responses() -> Generator[None, None, None]:
     r_mock.start()
 
     def request_callback(request: requests.PreparedRequest) -> ResponseType:
-        parsed = urlparse(request.url)
+        parsed: ParseResult = urlparse(request.url)  # type: ignore[assignment]
         mazure_request = MazureRequest(
             method=request.method,  # type: ignore
             host=parsed.hostname,  # type: ignore
-            path=parsed.path,  # type: ignore
+            path=parsed.path,
             headers=request.headers,  # type: ignore
             body=request.body,  # type: ignore
-            parsed_path=parsed,  # type: ignore
+            parsed_path=parsed,
         )
         for method, host_per_method in registered_services.items():
             if method != request.method:
                 continue
             for host, functions_by_path in host_per_method.items():
-                if host != parsed.scheme + "://" + parsed.netloc:  # type: ignore
+                requested_host = parsed.scheme + "://" + parsed.netloc
+                if not re.compile(host).match(requested_host):
                     continue
                 for path, func in functions_by_path.items():
-                    if path.match(parsed.path):  # type: ignore
+                    if path.match(parsed.path):
                         return func(mazure_request)
         raise ValueError
 

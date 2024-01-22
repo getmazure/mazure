@@ -6,6 +6,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+tests/tests_dotnet/*/bin
+tests/tests_dotnet/*/obj
+
 ### IntelliJ IDEA ###
 .idea/
 */.idea/
