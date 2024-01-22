@@ -5,8 +5,6 @@ from typing import Any, Dict
 
 from peewee import DateTimeField, ForeignKeyField, Model, TextField
 
-from mazure.mazure_core import db
-
 
 def _random_value() -> bytes:
     return b64encode(os.urandom(25))
@@ -17,9 +15,6 @@ class StorageAccountKey(Model):  # type: ignore[misc]
     key_name = TextField()
     value = TextField(default=_random_value)
 
-    class Meta:
-        database = db
-
 
 class StorageAccount(Model):  # type: ignore[misc]
     subscription_id = TextField()
@@ -28,9 +23,6 @@ class StorageAccount(Model):  # type: ignore[misc]
     location = TextField()
     storage_kind = TextField()
     sku = TextField()
-
-    class Meta:
-        database = db
 
     def to_json(self) -> Dict[str, Any]:
         keys = (
@@ -99,6 +91,3 @@ class StorageAccount(Model):  # type: ignore[misc]
 class StorageAccountKeyLink(Model):  # type: ignore[misc]
     key = ForeignKeyField(StorageAccountKey)
     account = ForeignKeyField(StorageAccount)
-
-    class Meta:
-        database = db

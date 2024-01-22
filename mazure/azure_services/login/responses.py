@@ -112,7 +112,8 @@ def get_oauth_token(
         if mailbox.startswith("0id:"):
             mailbox = mailbox[4:]
         uid, utid = mailbox.split("@")
-        client_info = base64.b64encode(json.dumps({"uid": uid, "utid": utid}))  # type: ignore
+        raw_info = json.dumps({"uid": uid, "utid": utid}).encode("utf-8")
+        client_info = base64.b64encode(raw_info)
     else:
         client_info = None
 
@@ -144,7 +145,7 @@ def get_oauth_token(
         "id_token": id_token,
     }
     if client_info is not None:
-        login_response["client_info"] = client_info
+        login_response["client_info"] = client_info.decode("utf-8")
     return 200, {}, json.dumps(login_response).encode("utf-8")
 
 

@@ -23,6 +23,7 @@ from .models.storage_account import (
 )
 def check_name_availability(request: MazureRequest) -> ResponseType:
     name = json.loads(request.body)["name"]
+    StorageAccount.table_exists()
     user = StorageAccount.select().where(StorageAccount.name == name)
     if user.exists():
         resp = {
@@ -90,7 +91,7 @@ def create_storage_account(request: MazureRequest) -> ResponseType:
 )
 def get_result_async_operation(request: MazureRequest) -> ResponseType:
     async_id = request.parsed_path.path.split("/")[-1]
-    op = AsyncStorageOperation.get(async_id)
+    op = AsyncStorageOperation.get_by_id(async_id)
 
     # Validation
     query_args = request.parsed_path.query.split("&")

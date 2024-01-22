@@ -32,6 +32,5 @@ def get_locations(request: MazureRequest) -> ResponseType:
     subscription_id = request.path.split("/")[2]
 
     response = response.replace("__SUBID__", subscription_id)
-    print(response)
 
     return 200, {}, response.encode("utf-8")
