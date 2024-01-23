@@ -1,4 +1,5 @@
 ### project specific
+docs/_build
 mazure/mazure_proxy/certs/*.crt
 
 target/
