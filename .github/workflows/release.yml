@@ -29,7 +29,7 @@ jobs:
         ! git rev-parse ${{ env.VERSION }} || { echo "Ensure that no tag exists for ${{ env.VERSION }}" ; exit 1; }
     - name: Build Docker release
       run: |
-        docker build -t mazureproxy/proxy . --tag mazure:${{ env.VERSION }}
+        docker build -t getmazure/mazure . --tag mazure:${{ env.VERSION }}
     - name: Tag version on Github
       run: |
         git tag ${{ env.VERSION }}
@@ -58,5 +58,5 @@ jobs:
         platforms: linux/amd64,linux/arm64
         push: true
         tags: |
-          mazureproxy/proxy:${{ env.VERSION }}
-          ghcr.io/getmoto/mazure:${{ env.VERSION }}
+          getmazure/mazure:${{ env.VERSION }}
+          ghcr.io/getmazure/mazure:${{ env.VERSION }}
