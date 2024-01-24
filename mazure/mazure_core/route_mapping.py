@@ -1,6 +1,7 @@
 from typing import Callable, Dict, Pattern
 
-from mazure.mazure_core import MazureRequest, ResponseType
+from mazure.mazure_core import ResponseType
+from mazure.mazure_core.mazure_request import MazureRequest
 
 registered_services: Dict[
     str, Dict[str, Dict[Pattern[str], Callable[[MazureRequest], ResponseType]]]

@@ -7,7 +7,7 @@ from typing import Any, Dict
 from urllib.parse import urlparse
 
 from mazure import azure_services  # pylint: disable=unused-import
-from mazure.mazure_core import MazureRequest
+from mazure.mazure_core.mazure_request import MazureRequest
 from mazure.mazure_core.service_discovery import execute
 
 from . import debug, info
