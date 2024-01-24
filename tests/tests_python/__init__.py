@@ -41,7 +41,7 @@ def load_responses() -> Generator[None, None, None]:
         raise ValueError
 
     for _, url in registered_parents.items():
-        for method in ["GET", "DELETE", "POST", "PUT", "PATCH"]:
+        for method in ["GET", "DELETE", "POST", "PUT", "PATCH", "HEAD"]:
             r_mock.add_callback(
                 method=method,
                 url=re.compile(url),

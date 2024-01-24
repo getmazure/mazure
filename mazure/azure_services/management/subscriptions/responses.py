@@ -5,22 +5,25 @@ from mazure.mazure_core.mazure_request import MazureRequest
 from mazure.mazure_core.route_mapping import register
 
 from .. import PathManagement, PathSingleSubscription
-from . import sub_model
+from .data.locations import locations
+from .model import Subscription
 
 
 @register(parent=PathManagement, path=r"/subscriptions$", method="GET")
 def get_subscriptions(
     request: MazureRequest,  # pylint: disable=unused-argument
 ) -> ResponseType:
-    response = json.dumps(sub_model.get_subscriptions())
+    if Subscription.select().count() == 0:  # pylint: disable=E1120
+        Subscription.create()
+    subs = [sub.to_json() for sub in Subscription.select()]
+    resp = {"count": {"type": "Total", "value": len(subs)}, "value": subs}
 
-    return 200, {}, response.encode("utf-8")
+    return 200, {}, json.dumps(resp).encode("utf-8")
 
 
 @register(parent=PathSingleSubscription, path=r"/locations$", method="GET")
 def get_locations(request: MazureRequest) -> ResponseType:
-    content = sub_model.get_locations()
-    response = json.dumps({"value": content})
+    response = json.dumps({"value": locations})
 
     # query could include includeExtendedLocations=true
     # But that returns the same result AFAICS
