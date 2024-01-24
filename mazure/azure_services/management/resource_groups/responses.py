@@ -6,14 +6,12 @@ from mazure.mazure_core import ResponseType
 from mazure.mazure_core.mazure_request import MazureRequest
 from mazure.mazure_core.route_mapping import register
 
-from .. import ManagementWebsite
+from .. import PathSingleSubscription
 from . import model
 
 
 @register(
-    parent=ManagementWebsite,
-    path=r"/subscriptions/[-a-z0-9A-Z]+/resourcegroups/[-_a-z0-9A-Z]+$",
-    method="PUT",
+    parent=PathSingleSubscription, path=r"/resourcegroups/[-_a-z0-9A-Z]+$", method="PUT"
 )
 def create_resource_group(request: MazureRequest) -> ResponseType:
     subscription_id = request.path.split("/")[-3]
@@ -34,8 +32,8 @@ def create_resource_group(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    parent=ManagementWebsite,
-    path=r"/subscriptions/[-a-z0-9A-Z]+/resourcegroups/[-_a-z0-9A-Z]+$",
+    parent=PathSingleSubscription,
+    path=r"/resourcegroups/[-_a-z0-9A-Z]+$",
     method="HEAD",
 )
 def has_resource_group(request: MazureRequest) -> ResponseType:
@@ -46,9 +44,7 @@ def has_resource_group(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    parent=ManagementWebsite,
-    path=r"/subscriptions/[-a-z0-9A-Z]+/resourcegroups/[-_a-z0-9A-Z]+$",
-    method="GET",
+    parent=PathSingleSubscription, path=r"/resourcegroups/[-_a-z0-9A-Z]+$", method="GET"
 )
 def get_resource_group(request: MazureRequest) -> ResponseType:
     subscription_id = request.path.split("/")[-3]
@@ -67,8 +63,8 @@ def get_resource_group(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    parent=ManagementWebsite,
-    path=r"/subscriptions/[-a-z0-9A-Z]+/resourcegroups/[-_a-z0-9A-Z]+$",
+    parent=PathSingleSubscription,
+    path=r"/resourcegroups/[-_a-z0-9A-Z]+$",
     method="DELETE",
 )
 def delete_resource_group(request: MazureRequest) -> ResponseType:
@@ -85,11 +81,7 @@ def delete_resource_group(request: MazureRequest) -> ResponseType:
     return 202, {"Location": location}, b""
 
 
-@register(
-    parent=ManagementWebsite,
-    path=r"/subscriptions/[-a-z0-9A-Z]+/resourcegroups$",
-    method="GET",
-)
+@register(parent=PathSingleSubscription, path=r"/resourcegroups$", method="GET")
 def list_resource_groups(request: MazureRequest) -> ResponseType:
     subscription_id = request.path.split("/")[-2]
     groups = [

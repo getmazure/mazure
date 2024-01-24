@@ -6,7 +6,7 @@ from mazure.mazure_core import ResponseType
 from mazure.mazure_core.mazure_request import MazureRequest
 from mazure.mazure_core.route_mapping import register
 
-from .. import ManagementWebsite
+from .. import PathSingleSubscription
 from .models.async_operation import AsyncStorageOperation
 from .models.storage_account import (
     StorageAccount,
@@ -16,8 +16,8 @@ from .models.storage_account import (
 
 
 @register(
-    parent=ManagementWebsite,
-    path=r"/subscriptions/[-a-z0-9A-Z]+/providers/Microsoft.Storage/checkNameAvailability",
+    parent=PathSingleSubscription,
+    path=r"/providers/Microsoft.Storage/checkNameAvailability",
     method="POST",
 )
 def check_name_availability(request: MazureRequest) -> ResponseType:
@@ -36,8 +36,8 @@ def check_name_availability(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    parent=ManagementWebsite,
-    path=r"/subscriptions/[-a-z0-9A-Z]+/resourceGroups/[-a-z0-9A-Z]+/providers/Microsoft.Storage/storageAccounts/[-_a-z0-9A-Z]+",
+    parent=PathSingleSubscription,
+    path=r"/resourceGroups/[-a-z0-9A-Z]+/providers/Microsoft.Storage/storageAccounts/[-_a-z0-9A-Z]+",
     method="PUT",
 )
 def create_storage_account(request: MazureRequest) -> ResponseType:
@@ -80,8 +80,8 @@ def create_storage_account(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    parent=ManagementWebsite,
-    path=r"/subscriptions/[-a-z0-9A-Z]+/providers/Microsoft.Storage/locations/[-a-z0-9A-Z]+/asyncoperations/[-a-z0-9A-Z]+",
+    parent=PathSingleSubscription,
+    path=r"/providers/Microsoft.Storage/locations/[-a-z0-9A-Z]+/asyncoperations/[-a-z0-9A-Z]+",
     method="GET",
 )
 def get_result_async_operation(request: MazureRequest) -> ResponseType:
@@ -104,8 +104,8 @@ def get_result_async_operation(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    parent=ManagementWebsite,
-    path=r"/subscriptions/[-a-z0-9A-Z]+/providers/Microsoft.Storage/storageAccounts",
+    parent=PathSingleSubscription,
+    path=r"/providers/Microsoft.Storage/storageAccounts",
     method="GET",
 )
 def get_storage_accounts(
@@ -121,8 +121,8 @@ def get_storage_accounts(
 
 
 @register(
-    parent=ManagementWebsite,
-    path=r"/subscriptions/[-a-z0-9A-Z]+/resourceGroups/[-a-z0-9A-Z]+/providers/Microsoft.Storage/storageAccounts/[-_a-z0-9A-Z]+/listKeys",
+    parent=PathSingleSubscription,
+    path=r"/resourceGroups/[-a-z0-9A-Z]+/providers/Microsoft.Storage/storageAccounts/[-_a-z0-9A-Z]+/listKeys",
     method="POST",
 )
 def list_keys(request: MazureRequest) -> ResponseType:
