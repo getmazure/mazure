@@ -1,7 +1,6 @@
 import base64
 import json
 import random
-import re
 import string
 from datetime import datetime, timezone
 from urllib.parse import unquote
@@ -10,12 +9,22 @@ import jwt
 
 from mazure.mazure_core import ResponseType
 from mazure.mazure_core.mazure_request import MazureRequest
-from mazure.mazure_core.route_mapping import register
+from mazure.mazure_core.route_mapping import register, register_parent
+
+
+@register_parent(path="https://login.microsoftonline.com")
+class MicrosoftLogin:
+    pass
+
+
+@register_parent(path="http://169.254.169.254")
+class ManagedIdentityServer:
+    pass
 
 
 @register(
-    "https://login.microsoftonline.com",
-    path=re.compile("^/[-a-z0-9A-Z]+/.well-known/openid-configuration$"),
+    parent=MicrosoftLogin,
+    path=r"/[-a-z0-9A-Z]+/.well-known/openid-configuration$",
     method="GET",
 )
 def get_wellknown_endpoint(request: MazureRequest) -> ResponseType:
@@ -23,8 +32,8 @@ def get_wellknown_endpoint(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    "https://login.microsoftonline.com",
-    path=re.compile("^/[-a-z0-9A-Z]+/v2.0/.well-known/openid-configuration$"),
+    parent=MicrosoftLogin,
+    path=r"/[-a-z0-9A-Z]+/v2.0/.well-known/openid-configuration$",
     method="GET",
 )
 def get_wellknown_endpoint_2(
@@ -91,8 +100,8 @@ def get_wellknown_endpoint_2(
 
 
 @register(
-    "https://login.microsoftonline.com",
-    path=re.compile("^/[-a-z0-9A-Z]+/oauth2/v2.0/token$"),
+    parent=MicrosoftLogin,
+    path=r"/[-a-z0-9A-Z]+/oauth2/v2.0/token$",
     method="POST",
 )
 def get_oauth_token(
@@ -151,8 +160,8 @@ def get_oauth_token(
 
 
 @register(
-    "http://169.254.169.254",
-    path=re.compile("^/metadata/identity/oauth2/token$"),
+    parent=ManagedIdentityServer,
+    path=r"/metadata/identity/oauth2/token$",
     method="GET",
 )
 def get_oauth_token__managed_identity(

@@ -19,6 +19,7 @@ def load_responses() -> Generator[None, None, None]:
         MazureRequest,
     )
     from mazure.mazure_core.route_mapping import (  # pylint: disable=import-outside-toplevel
+        registered_parents,
         registered_services,
     )
 
@@ -35,23 +36,21 @@ def load_responses() -> Generator[None, None, None]:
             body=request.body,  # type: ignore
             parsed_path=parsed,
         )
-        for method, host_per_method in registered_services.items():
+        for method, fn_per_path in registered_services.items():
             if method != request.method:
                 continue
-            for host, functions_by_path in host_per_method.items():
-                requested_host = parsed.scheme + "://" + parsed.netloc
-                if not re.compile(host).match(requested_host):
-                    continue
-                for path, func in functions_by_path.items():
-                    if path.match(parsed.path):
-                        return func(mazure_request)
+            for path, func in fn_per_path.items():
+                requested_path = parsed.scheme + "://" + parsed.netloc + parsed.path
+                if re.compile(path).match(requested_path):
+                    return func(mazure_request)
+
         raise ValueError
 
-    for method, per_host in registered_services.items():
-        for host in per_host.keys():
+    for _, url in registered_parents.items():
+        for method in ["GET", "DELETE", "POST", "PUT", "PATCH"]:
             r_mock.add_callback(
                 method=method,
-                url=re.compile(host),
+                url=re.compile(url),
                 callback=request_callback,
                 match_querystring=False,
             )
