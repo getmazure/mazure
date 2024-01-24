@@ -2,12 +2,12 @@ from mazure.mazure_core import ResponseType
 from mazure.mazure_core.mazure_request import MazureRequest
 from mazure.mazure_core.route_mapping import register
 
-from .. import ManagementWebsite
+from .. import PathSingleSubscription
 
 
 @register(
-    parent=ManagementWebsite,
-    path=r"/subscriptions/[-a-z0-9A-Z]+/operationresults/[-_a-z0-9A-Z]+$",
+    parent=PathSingleSubscription,
+    path=r"/operationresults/[-_a-z0-9A-Z]+$",
     method="GET",
 )
 def get_operation_result(

@@ -9,12 +9,12 @@ from mazure.mazure_core.mazure_request import MazureRequest
 from mazure.mazure_core.route_mapping import register
 from mazure.mazure_proxy.utils import chunk_body
 
-from .. import GraphHost
+from .. import PathGraph
 from .models import graph_backend
 
 
 @register(
-    parent=GraphHost,
+    parent=PathGraph,
     path=r"/v1.0/applications$",
     method="GET",
 )
@@ -35,7 +35,7 @@ def list_applications(
 
 
 @register(
-    parent=GraphHost,
+    parent=PathGraph,
     path=r"/v1.0/applications$",
     method="POST",
 )
@@ -54,7 +54,7 @@ def create_application(
 
 
 @register(
-    parent=GraphHost,
+    parent=PathGraph,
     path=r"/v1.0/applications/[^/]+$",
     method="GET",
 )
@@ -74,7 +74,7 @@ def get_application(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    parent=GraphHost,
+    parent=PathGraph,
     path=r"/v1.0/applications\(appId='[-a-z0-9A-Z]+'\)$",
     method="GET",
 )
@@ -94,7 +94,7 @@ def get_application_by_app_id(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    parent=GraphHost,
+    parent=PathGraph,
     path=r"/v1.0/applications/[-a-z0-9A-Z]+$",
     method="PATCH",
 )
@@ -110,7 +110,7 @@ def update_application(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    parent=GraphHost,
+    parent=PathGraph,
     path=r"/v1.0/applications\(appId='[-a-z0-9A-Z]+'\)$",
     method="PATCH",
 )
@@ -126,7 +126,7 @@ def update_application_by_app_id(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    parent=GraphHost,
+    parent=PathGraph,
     path=r"/v1.0/applications/[-a-z0-9A-Z]+$",
     method="DELETE",
 )
@@ -139,7 +139,7 @@ def delete_application(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    parent=GraphHost,
+    parent=PathGraph,
     path=r"/v1.0/applications\(appId='[-a-z0-9A-Z]+'\)$",
     method="DELETE",
 )
@@ -152,7 +152,7 @@ def delete_application_by_app_id(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    parent=GraphHost,
+    parent=PathGraph,
     path=r"/directory/deleteditems/microsoft.graph.application$",
     method="GET",
 )
@@ -173,7 +173,7 @@ def list_deleted_applications(
 
 
 @register(
-    parent=GraphHost,
+    parent=PathGraph,
     path=r"/v1.0/applications/[-a-z0-9A-Z]+/addPassword$",
     method="POST",
 )
@@ -207,7 +207,7 @@ def add_password(
 
 
 @register(
-    parent=GraphHost,
+    parent=PathGraph,
     path=r"/v1.0/servicePrincipals$",
     method="POST",
 )

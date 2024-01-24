@@ -9,15 +9,16 @@ from .models.storage_container import StorageContainer
 
 
 @register_parent(path="https://[-_a-z0-9A-Z]+.blob.core.windows.net")
-class StorageHost:
+class PathStorageAccount:
     pass
 
 
-@register(
-    parent=StorageHost,
-    path=r"/$",
-    method="GET",
-)
+@register_parent(path=r"/[-_a-z0-9A-Z]+")
+class PathStorageContainer(PathStorageAccount):
+    pass
+
+
+@register(parent=PathStorageAccount, path=r"/$", method="GET")
 def list_containers(request: MazureRequest) -> ResponseType:
     resp = f'<?xml version="1.0" encoding="utf-8"?><EnumerationResults ServiceEndpoint="{request.host}/"><MaxResults>5000</MaxResults><Containers>'
     for container in StorageContainer.select():
@@ -26,11 +27,7 @@ def list_containers(request: MazureRequest) -> ResponseType:
     return 200, {}, resp.encode("utf-8")
 
 
-@register(
-    parent=StorageHost,
-    path=r"/[-_a-z0-9A-Z]+$",
-    method="PUT",
-)
+@register(parent=PathStorageContainer, path=r"$", method="PUT")
 def create_container(request: MazureRequest) -> ResponseType:
     # ?restype=container
     name = request.parsed_path.path[1:]  # skip the initial /
@@ -50,11 +47,7 @@ def create_container(request: MazureRequest) -> ResponseType:
     return 201, {}, b""
 
 
-@register(
-    parent=StorageHost,
-    path=r"/[-_a-z0-9A-Z]+$",
-    method="DELETE",
-)
+@register(parent=PathStorageContainer, path=r"$", method="DELETE")
 def delete_container(request: MazureRequest) -> ResponseType:
     # ?restype=container
     if StorageContainer.delete_by_id(request.parsed_path.path.split("/")[-1]):
@@ -63,11 +56,7 @@ def delete_container(request: MazureRequest) -> ResponseType:
     return 404, {"Content-Type": "application/xml"}, error
 
 
-@register(
-    parent=StorageHost,
-    path=r"/[-_a-z0-9A-Z]+$",
-    method="GET",
-)
+@register(parent=PathStorageContainer, path=r"$", method="GET")
 def list_blobs(request: MazureRequest) -> ResponseType:
     # ?restype=container
     resp = f'<?xml version="1.0" encoding="utf-8"?><EnumerationResults ServiceEndpoint="https://{request.host}/" ContainerName="{request.parsed_path.path[1:]}"><MaxResults>5000</MaxResults><Blobs>'
@@ -77,11 +66,7 @@ def list_blobs(request: MazureRequest) -> ResponseType:
     return 200, {"Content-Type": "application/xml"}, resp.encode("utf-8")
 
 
-@register(
-    parent=StorageHost,
-    path=r"/[-_a-z0-9A-Z]+/[-_a-z0-9A-Z]+",
-    method="PUT",
-)
+@register(parent=PathStorageContainer, path=r"/[-_a-z0-9A-Z]+", method="PUT")
 def upload_blob(request: MazureRequest) -> ResponseType:
     # storage_container = request.parsed_path.path.split("/")[1]
     blob_name = "/".join(request.parsed_path.path.split("/")[2:])
@@ -96,11 +81,7 @@ def upload_blob(request: MazureRequest) -> ResponseType:
     return 201, headers, b""
 
 
-@register(
-    parent=StorageHost,
-    path=r"/[-_a-z0-9A-Z]+/[-_a-z0-9A-Z.]+$",
-    method="GET",
-)
+@register(parent=PathStorageContainer, path=r"/[-_a-z0-9A-Z.]+$", method="GET")
 def download_blob(request: MazureRequest) -> ResponseType:
     # storage_container = request.parsed_path.path.split("/")[1]
     blob_name = "/".join(request.parsed_path.path.split("/")[2:])

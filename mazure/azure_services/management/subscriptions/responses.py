@@ -4,11 +4,11 @@ from mazure.mazure_core import ResponseType
 from mazure.mazure_core.mazure_request import MazureRequest
 from mazure.mazure_core.route_mapping import register
 
-from .. import ManagementWebsite
+from .. import PathManagement, PathSingleSubscription
 from . import sub_model
 
 
-@register(parent=ManagementWebsite, path=r"/subscriptions$", method="GET")
+@register(parent=PathManagement, path=r"/subscriptions$", method="GET")
 def get_subscriptions(
     request: MazureRequest,  # pylint: disable=unused-argument
 ) -> ResponseType:
@@ -17,11 +17,7 @@ def get_subscriptions(
     return 200, {}, response.encode("utf-8")
 
 
-@register(
-    parent=ManagementWebsite,
-    path=r"/subscriptions/[-a-z0-9A-Z]+/locations$",
-    method="GET",
-)
+@register(parent=PathSingleSubscription, path=r"/locations$", method="GET")
 def get_locations(request: MazureRequest) -> ResponseType:
     content = sub_model.get_locations()
     response = json.dumps({"value": content})

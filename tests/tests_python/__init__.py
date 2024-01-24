@@ -9,16 +9,10 @@ import responses
 
 @pytest.fixture(autouse=True)
 def load_responses() -> Generator[None, None, None]:
-    from mazure import (  # pylint: disable=import-outside-toplevel,unused-import
-        azure_services,
-    )
-    from mazure.mazure_core import (  # pylint: disable=import-outside-toplevel
-        ResponseType,
-    )
-    from mazure.mazure_core.mazure_request import (  # pylint: disable=import-outside-toplevel
-        MazureRequest,
-    )
-    from mazure.mazure_core.route_mapping import (  # pylint: disable=import-outside-toplevel
+    from mazure import azure_services  # pylint: disable=C0415,W0611
+    from mazure.mazure_core import ResponseType  # pylint: disable=C0415
+    from mazure.mazure_core.mazure_request import MazureRequest  # pylint: disable=C0415
+    from mazure.mazure_core.route_mapping import (  # pylint: disable=C0415
         registered_parents,
         registered_services,
     )
