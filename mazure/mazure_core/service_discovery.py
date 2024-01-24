@@ -1,6 +1,5 @@
 import re
 from gzip import compress
-from typing import Any, Dict
 
 from mazure.mazure_core import ResponseType
 from mazure.mazure_core.mazure_request import MazureRequest
@@ -38,20 +37,10 @@ def execute(request: MazureRequest) -> ResponseType:
 
 
 def _get_response(request: MazureRequest) -> ResponseType:
-    status_code: int
-    res_headers: Dict[str, Any]
-    res_body: bytes
     if request.method in registered_services:
-        for host, operations in registered_services[request.method].items():
-            if re.match(host, request.host):
-                status_code, res_headers, res_body = 404, {}, ERROR_NOT_YET_IMPLEMENTED
+        for path, func in registered_services[request.method].items():
+            requested_path = request.host + request.path
+            if re.match(path, requested_path):
+                return func(request)
 
-                for path, func in operations.items():
-                    if re.match(path, request.path):
-                        return func(request)
-
-            else:
-                status_code, res_headers, res_body = 404, {}, ERROR_NOT_YET_IMPLEMENTED
-    else:
-        status_code, res_headers, res_body = 404, {}, ERROR_NOT_YET_IMPLEMENTED
-    return status_code, res_headers, res_body
+    return 404, {}, ERROR_NOT_YET_IMPLEMENTED

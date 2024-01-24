@@ -9,12 +9,13 @@ from mazure.mazure_core.mazure_request import MazureRequest
 from mazure.mazure_core.route_mapping import register
 from mazure.mazure_proxy.utils import chunk_body
 
+from .. import GraphHost
 from .models import graph_backend
 
 
 @register(
-    "https://graph.microsoft.com",
-    path=re.compile(r"^/v1.0/applications$"),
+    parent=GraphHost,
+    path=r"/v1.0/applications$",
     method="GET",
 )
 def list_applications(
@@ -34,8 +35,8 @@ def list_applications(
 
 
 @register(
-    "https://graph.microsoft.com",
-    path=re.compile(r"^/v1.0/applications$"),
+    parent=GraphHost,
+    path=r"/v1.0/applications$",
     method="POST",
 )
 def create_application(
@@ -53,8 +54,8 @@ def create_application(
 
 
 @register(
-    "https://graph.microsoft.com",
-    path=re.compile(r"^/v1.0/applications/[^/]+$"),
+    parent=GraphHost,
+    path=r"/v1.0/applications/[^/]+$",
     method="GET",
 )
 def get_application(request: MazureRequest) -> ResponseType:
@@ -73,8 +74,8 @@ def get_application(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    "https://graph.microsoft.com",
-    path=re.compile(r"^/v1.0/applications\(appId='[-a-z0-9A-Z]+'\)$"),
+    parent=GraphHost,
+    path=r"/v1.0/applications\(appId='[-a-z0-9A-Z]+'\)$",
     method="GET",
 )
 def get_application_by_app_id(request: MazureRequest) -> ResponseType:
@@ -93,8 +94,8 @@ def get_application_by_app_id(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    "https://graph.microsoft.com",
-    path=re.compile(r"^/v1.0/applications/[-a-z0-9A-Z]+$"),
+    parent=GraphHost,
+    path=r"/v1.0/applications/[-a-z0-9A-Z]+$",
     method="PATCH",
 )
 def update_application(request: MazureRequest) -> ResponseType:
@@ -109,8 +110,8 @@ def update_application(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    "https://graph.microsoft.com",
-    path=re.compile(r"^/v1.0/applications\(appId='[-a-z0-9A-Z]+'\)$"),
+    parent=GraphHost,
+    path=r"/v1.0/applications\(appId='[-a-z0-9A-Z]+'\)$",
     method="PATCH",
 )
 def update_application_by_app_id(request: MazureRequest) -> ResponseType:
@@ -125,8 +126,8 @@ def update_application_by_app_id(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    "https://graph.microsoft.com",
-    path=re.compile(r"^/v1.0/applications/[-a-z0-9A-Z]+$"),
+    parent=GraphHost,
+    path=r"/v1.0/applications/[-a-z0-9A-Z]+$",
     method="DELETE",
 )
 def delete_application(request: MazureRequest) -> ResponseType:
@@ -138,8 +139,8 @@ def delete_application(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    "https://graph.microsoft.com",
-    path=re.compile(r"^/v1.0/applications\(appId='[-a-z0-9A-Z]+'\)$"),
+    parent=GraphHost,
+    path=r"/v1.0/applications\(appId='[-a-z0-9A-Z]+'\)$",
     method="DELETE",
 )
 def delete_application_by_app_id(request: MazureRequest) -> ResponseType:
@@ -151,8 +152,8 @@ def delete_application_by_app_id(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    "https://graph.microsoft.com",
-    path=re.compile(r"^/directory/deleteditems/microsoft.graph.application$"),
+    parent=GraphHost,
+    path=r"/directory/deleteditems/microsoft.graph.application$",
     method="GET",
 )
 def list_deleted_applications(
@@ -172,8 +173,8 @@ def list_deleted_applications(
 
 
 @register(
-    "https://graph.microsoft.com",
-    path=re.compile(r"^/v1.0/applications/[-a-z0-9A-Z]+/addPassword$"),
+    parent=GraphHost,
+    path=r"/v1.0/applications/[-a-z0-9A-Z]+/addPassword$",
     method="POST",
 )
 def add_password(
@@ -206,8 +207,8 @@ def add_password(
 
 
 @register(
-    "https://graph.microsoft.com",
-    path=re.compile(r"^/v1.0/servicePrincipals$"),
+    parent=GraphHost,
+    path=r"/v1.0/servicePrincipals$",
     method="POST",
 )
 def create_service_principal(

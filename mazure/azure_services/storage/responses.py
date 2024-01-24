@@ -1,17 +1,21 @@
-import re
 from datetime import datetime
 
 from mazure.mazure_core import ResponseType
 from mazure.mazure_core.mazure_request import MazureRequest
-from mazure.mazure_core.route_mapping import register
+from mazure.mazure_core.route_mapping import register, register_parent
 
 from .models.blob import Blob
 from .models.storage_container import StorageContainer
 
 
+@register_parent(path="https://[-_a-z0-9A-Z]+.blob.core.windows.net")
+class StorageHost:
+    pass
+
+
 @register(
-    host="https://[-_a-z0-9A-Z]+.blob.core.windows.net",
-    path=re.compile("^/$"),
+    parent=StorageHost,
+    path=r"/$",
     method="GET",
 )
 def list_containers(request: MazureRequest) -> ResponseType:
@@ -23,8 +27,8 @@ def list_containers(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    host="https://[-_a-z0-9A-Z]+.blob.core.windows.net",
-    path=re.compile("^/[-_a-z0-9A-Z]+$"),
+    parent=StorageHost,
+    path=r"/[-_a-z0-9A-Z]+$",
     method="PUT",
 )
 def create_container(request: MazureRequest) -> ResponseType:
@@ -47,8 +51,8 @@ def create_container(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    host="https://[-_a-z0-9A-Z]+.blob.core.windows.net",
-    path=re.compile("^/[-_a-z0-9A-Z]+$"),
+    parent=StorageHost,
+    path=r"/[-_a-z0-9A-Z]+$",
     method="DELETE",
 )
 def delete_container(request: MazureRequest) -> ResponseType:
@@ -60,8 +64,8 @@ def delete_container(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    host="https://[-_a-z0-9A-Z]+.blob.core.windows.net",
-    path=re.compile("^/[-_a-z0-9A-Z]+$"),
+    parent=StorageHost,
+    path=r"/[-_a-z0-9A-Z]+$",
     method="GET",
 )
 def list_blobs(request: MazureRequest) -> ResponseType:
@@ -74,8 +78,8 @@ def list_blobs(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    host="https://[-_a-z0-9A-Z]+.blob.core.windows.net",
-    path=re.compile("/[-_a-z0-9A-Z]+/[-_a-z0-9A-Z]+"),
+    parent=StorageHost,
+    path=r"/[-_a-z0-9A-Z]+/[-_a-z0-9A-Z]+",
     method="PUT",
 )
 def upload_blob(request: MazureRequest) -> ResponseType:
@@ -93,8 +97,8 @@ def upload_blob(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    host="https://[-_a-z0-9A-Z]+.blob.core.windows.net",
-    path=re.compile("^/[-_a-z0-9A-Z]+/[-_a-z0-9A-Z.]+$"),
+    parent=StorageHost,
+    path=r"/[-_a-z0-9A-Z]+/[-_a-z0-9A-Z.]+$",
     method="GET",
 )
 def download_blob(request: MazureRequest) -> ResponseType:

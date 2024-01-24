@@ -1,16 +1,14 @@
 import json
-import re
 
 from mazure.mazure_core import ResponseType
 from mazure.mazure_core.mazure_request import MazureRequest
 from mazure.mazure_core.route_mapping import register
 
+from .. import ManagementWebsite
 from . import sub_model
 
 
-@register(
-    "https://management.azure.com", path=re.compile("^/subscriptions$"), method="GET"
-)
+@register(parent=ManagementWebsite, path=r"/subscriptions$", method="GET")
 def get_subscriptions(
     request: MazureRequest,  # pylint: disable=unused-argument
 ) -> ResponseType:
@@ -20,8 +18,8 @@ def get_subscriptions(
 
 
 @register(
-    "https://management.azure.com",
-    path=re.compile("^/subscriptions/[-a-z0-9A-Z]+/locations$"),
+    parent=ManagementWebsite,
+    path=r"/subscriptions/[-a-z0-9A-Z]+/locations$",
     method="GET",
 )
 def get_locations(request: MazureRequest) -> ResponseType:

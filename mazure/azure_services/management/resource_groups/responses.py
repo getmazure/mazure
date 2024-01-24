@@ -1,18 +1,18 @@
 import json
 import random
-import re
 import string
 
 from mazure.mazure_core import ResponseType
 from mazure.mazure_core.mazure_request import MazureRequest
 from mazure.mazure_core.route_mapping import register
 
+from .. import ManagementWebsite
 from . import model
 
 
 @register(
-    "https://management.azure.com",
-    path=re.compile("^/subscriptions/[-a-z0-9A-Z]+/resourcegroups/[-_a-z0-9A-Z]+$"),
+    parent=ManagementWebsite,
+    path=r"/subscriptions/[-a-z0-9A-Z]+/resourcegroups/[-_a-z0-9A-Z]+$",
     method="PUT",
 )
 def create_resource_group(request: MazureRequest) -> ResponseType:
@@ -34,8 +34,8 @@ def create_resource_group(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    "https://management.azure.com",
-    path=re.compile("^/subscriptions/[-a-z0-9A-Z]+/resourcegroups/[-_a-z0-9A-Z]+$"),
+    parent=ManagementWebsite,
+    path=r"/subscriptions/[-a-z0-9A-Z]+/resourcegroups/[-_a-z0-9A-Z]+$",
     method="HEAD",
 )
 def has_resource_group(request: MazureRequest) -> ResponseType:
@@ -46,8 +46,8 @@ def has_resource_group(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    "https://management.azure.com",
-    path=re.compile("^/subscriptions/[-a-z0-9A-Z]+/resourcegroups/[-_a-z0-9A-Z]+$"),
+    parent=ManagementWebsite,
+    path=r"/subscriptions/[-a-z0-9A-Z]+/resourcegroups/[-_a-z0-9A-Z]+$",
     method="GET",
 )
 def get_resource_group(request: MazureRequest) -> ResponseType:
@@ -67,8 +67,8 @@ def get_resource_group(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    "https://management.azure.com",
-    path=re.compile("^/subscriptions/[-a-z0-9A-Z]+/resourcegroups/[-_a-z0-9A-Z]+$"),
+    parent=ManagementWebsite,
+    path=r"/subscriptions/[-a-z0-9A-Z]+/resourcegroups/[-_a-z0-9A-Z]+$",
     method="DELETE",
 )
 def delete_resource_group(request: MazureRequest) -> ResponseType:
@@ -86,8 +86,8 @@ def delete_resource_group(request: MazureRequest) -> ResponseType:
 
 
 @register(
-    "https://management.azure.com",
-    path=re.compile("^/subscriptions/[-a-z0-9A-Z]+/resourcegroups$"),
+    parent=ManagementWebsite,
+    path=r"/subscriptions/[-a-z0-9A-Z]+/resourcegroups$",
     method="GET",
 )
 def list_resource_groups(request: MazureRequest) -> ResponseType:
