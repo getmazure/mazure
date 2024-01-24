@@ -1,6 +1,7 @@
 import re
 
-from mazure.mazure_core import MazureRequest, ResponseType
+from mazure.mazure_core import ResponseType
+from mazure.mazure_core.mazure_request import MazureRequest
 from mazure.mazure_core.route_mapping import register
 
 

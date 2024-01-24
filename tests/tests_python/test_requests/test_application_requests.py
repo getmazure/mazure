@@ -22,23 +22,23 @@ from .. import load_responses  # pylint: disable=W0611
 MODELS = [Application, DeletedApplication]
 
 # use an in-memory SQLite for tests.
-test_db = SqliteDatabase(":memory:")
+_test_db = SqliteDatabase(":memory:")
 
 
 class TestGraphApplications:
-    def setup(self) -> None:
+    def setup_method(self) -> None:
         # Bind model classes to test db. Since we have a complete list of
         # all models, we do not need to recursively bind dependencies.
-        test_db.bind(MODELS, bind_refs=False, bind_backrefs=False)
+        _test_db.bind(MODELS, bind_refs=False, bind_backrefs=False)
 
-        test_db.connect()
-        test_db.create_tables(MODELS)
+        _test_db.connect()
+        _test_db.create_tables(MODELS)
 
-    def teardown(self) -> None:
-        test_db.drop_tables(MODELS)
+    def teardown_method(self) -> None:
+        _test_db.drop_tables(MODELS)
 
         # Close connection to db.
-        test_db.close()
+        _test_db.close()
 
     def test_list_application(self) -> None:
         resp = requests.get("https://graph.microsoft.com/v1.0/applications", timeout=2)

@@ -4,7 +4,8 @@ import re
 import string
 from uuid import uuid4
 
-from mazure.mazure_core import MazureRequest, ResponseType
+from mazure.mazure_core import ResponseType
+from mazure.mazure_core.mazure_request import MazureRequest
 from mazure.mazure_core.route_mapping import register
 from mazure.mazure_proxy.utils import chunk_body
 
