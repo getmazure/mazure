@@ -7,7 +7,7 @@ from mazure.mazure_core.mazure_request import MazureRequest
 from mazure.mazure_core.route_mapping import register
 
 from .. import PathSingleSubscription
-from . import model
+from .model import ResourceGroup
 
 
 @register(
@@ -17,18 +17,13 @@ def create_resource_group(request: MazureRequest) -> ResponseType:
     subscription_id = request.path.split("/")[-3]
     name = request.path.split("/")[-1]
     location = json.loads(request.body)["location"]
-    model.create_resource_group(name, location)
+    rg = ResourceGroup.create(
+        subscription_id=subscription_id, name=name, location=location
+    )
 
-    data = {
-        "id": f"/subscriptions/{subscription_id}/resourceGroups/{name}",
-        "location": location,
-        "name": name,
-        "properties": {"provisioningState": "Succeeded"},
-        "type": "Microsoft.Resources/resourceGroups",
-    }
-    response = json.dumps(data).encode("utf-8")
+    response = json.dumps(rg.to_json()).encode("utf-8")
 
-    return 201, {"content-length": len(response)}, response
+    return 201, {"content-length": str(len(response))}, response
 
 
 @register(
@@ -38,7 +33,7 @@ def create_resource_group(request: MazureRequest) -> ResponseType:
 )
 def has_resource_group(request: MazureRequest) -> ResponseType:
     name = request.path.split("/")[-1]
-    if model.has_resource_group(name):
+    if ResourceGroup.get_or_none(ResourceGroup.name == name) is not None:
         return 204, {}, b""
     return 404, {}, b""
 
@@ -49,15 +44,10 @@ def has_resource_group(request: MazureRequest) -> ResponseType:
 def get_resource_group(request: MazureRequest) -> ResponseType:
     subscription_id = request.path.split("/")[-3]
     name = request.path.split("/")[-1]
-    location = model.resource_groups[name]
-    data = {
-        "id": f"/subscriptions/{subscription_id}/resourceGroups/{name}",
-        "location": location,
-        "name": name,
-        "properties": {"provisioningState": "Succeeded"},
-        "type": "Microsoft.Resources/resourceGroups",
-    }
-    response = json.dumps(data).encode("utf-8")
+    rg = ResourceGroup.get_or_none(
+        ResourceGroup.subscription_id == subscription_id, ResourceGroup.name == name
+    )
+    response = json.dumps(rg.to_json()).encode("utf-8")
 
     return 200, {}, response
 
@@ -70,7 +60,12 @@ def get_resource_group(request: MazureRequest) -> ResponseType:
 def delete_resource_group(request: MazureRequest) -> ResponseType:
     subscription_id = request.path.split("/")[-3]
     name = request.path.split("/")[-1]
-    model.resource_groups.pop(name)
+
+    rg = ResourceGroup.get_or_none(
+        ResourceGroup.subscription_id == subscription_id, ResourceGroup.name == name
+    )
+    ResourceGroup.delete_by_id(rg.id)
+
     options = string.ascii_letters + string.digits
     operation_result = "".join(random.choices(options, k=122))
     t = "".join(random.choices(string.digits, k=18))
@@ -84,16 +79,10 @@ def delete_resource_group(request: MazureRequest) -> ResponseType:
 @register(parent=PathSingleSubscription, path=r"/resourcegroups$", method="GET")
 def list_resource_groups(request: MazureRequest) -> ResponseType:
     subscription_id = request.path.split("/")[-2]
-    groups = [
-        {
-            "id": f"/subscriptions/{subscription_id}/resourceGroups/{name}",
-            "location": location,
-            "name": name,
-            "properties": {"provisioningState": "Succeeded"},
-            "type": "Microsoft.Resources/resourceGroups",
-        }
-        for name, location in model.resource_groups.items()
-    ]
-    response = json.dumps({"value": groups}).encode("utf-8")
+    all_resource_groups = ResourceGroup.select().where(
+        ResourceGroup.subscription_id == subscription_id
+    )
+    rgs = [rg.to_json() for rg in all_resource_groups]  # pylint: disable=E1133
+    response = json.dumps({"value": rgs}).encode("utf-8")
 
-    return 200, {}, response
+    return 200, {"Content-Type": "application/json"}, response
